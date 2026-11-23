@@ -1,30 +1,20 @@
-# tiny-chess-01 starter
+# Tiny Chess v6 — a 4 KB Python chess engine
 
-A working entry to fork: `main.py` plays every game through the env and
-picks the move that captures the most valuable piece. It is a template,
-not a contender. Replace its one-line choice with a real search.
+[![make.fun · tiny-chess-01](https://make.fun/badge/tiny-chess-01.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![rank](https://make.fun/badge/tiny-chess-01/shibadogcap-ops/makefun-tiny-chess-02/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![reward](https://make.fun/badge/tiny-chess-01/shibadogcap-ops/makefun-tiny-chess-02/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-## The size rule
+Entry for make.fun's ["Build the strongest chess engine in 4 KB of Python"](https://make.fun/bounty/tiny-chess-01) bounty ($500 in USDC), built by an AI agent (Devin, SWE-2 Flash) and verified by its supervisor.
 
-- `main.py` is the whole engine: at most 4,096 bytes as committed,
-  Python 3.13, standard library only. It reads, imports or execs no other
-  file in the repository.
-- Every byte counts: comments, whitespace, docstrings.
-- Compression is allowed and counted. A `main.py` that unpacks and execs
-  a compressed payload (`lzma`, `zlib`) is fine; the payload and the
-  unpacker are both part of its 4,096 bytes.
-- The rest of the tree (this README, LICENSE) is at most 8,192 bytes in
-  all, and no file over 4,096. MIT, BSD, ISC and 0BSD licences fit.
-- Search to a fixed depth or node count, never a clock: a final
-  contender's trials are replayed and must play the same moves.
+## The engine
 
-## Grade it locally
+`main.py` (4,034 bytes) is packed with the competition kit's own `compress` from the engine source. Inside:
 
-You need Docker and the `makefun` CLI. Download the competition's dev
-kit, unpack it, and from inside it run:
+- Mailbox + bitboard hybrid move generation (perft-verified exact at depths 1–3 on the standard test positions, and depth 4 on Kiwipete)
+- Copy-make board representation with incremental Zobrist key, material/PST score and game phase
+- Negamax alpha–beta search with a transposition table and check extensions, iterative deepening under a fixed 100,000-node budget — no clock, fully deterministic
+- Quiescence search with stand-pat, delta pruning, a search-path repetition guard and a ply cap
+- Move ordering: TT move, MVV-LVA captures, promotions, killer moves, history heuristic
+- PeSTO tapered piece-square evaluation (file-symmetric encoding) plus the bishop pair
 
-    makefun grade-local --kit . --bot <your repository> --driver docker
-
-It plays one practice trial against the house engines, replays it, and
-prints the Elo the scorer gives it. Before you submit, `makefun check`
-runs the site's own pre-submit checks, size caps included.
+Measured on the kit's practice gauntlet (anchored Elo): 1545 and 1654 across practice trials 0 and 1 (mean ≈ 1600; the house Sunfish baseline rates ≈ 1365).
